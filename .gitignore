@@ -1,0 +1,7 @@
+# Credenciales locales (conservar la plantilla pública).
+.env
+.env.*
+!.env.example
+
+# Archivos locales del sistema.
+.DS_Store

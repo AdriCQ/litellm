@@ -1,0 +1,253 @@
+# ==========================================================================
+# Configuración de LiteLLM Proxy
+#   - Los modelos/proveedores se definen aquí (fuente de verdad del fichero).
+#   - Las keys de los proveedores NO van aquí: se leen del contenedor como
+#     variables de entorno (.env en el host, montadas por docker-compose)
+#     usando la sintaxis os.environ/NOMBRE_VAR.
+#   - Los modelos de este fichero aparecen en la Admin UI pero son de solo
+#     lectura ahí: se editan aquí y se recarga el stack.
+#   - assistant-free: TODOS los despliegues activos comparten este
+#     model_name para rotarlos (load balancing/fallback de LiteLLM).
+#     AVISO: incluye rutas de pago (openrouter-auto, claude, gemini-pro,
+#     ollama-cloud 120b) que pueden facturar. El alias original queda en
+#     comentario tras cada model_name.
+# ==========================================================================
+
+model_list:
+
+  # ---- OpenRouter (acceso a todos los proveedores, incluidos modelos free) --
+  - model_name: assistant-free # openrouter-auto (PAGO: puede facturar)
+    litellm_params:
+      model: openrouter/openrouter/auto
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # Catálogo :free verificado en https://openrouter.ai/api/v1/models
+  # Instantánea: 2026-10-15. Disponibilidad y cuotas pueden cambiar.
+  # Todos comparten OPENROUTER_API_KEY; no hay fallback a modelos de pago.
+  # Solo >8B totales (criterio OpenRouter API: total params; p. ej. laguna-xs
+  # 33B y north-mini-code 30B se mantienen aunque su nombre suene pequeño).
+  # Excluidos: openrouter/free (router genérico), lfm-2.5-2.6b (2.6B) y
+  # nemotron-3.5-content-safety (guardrail 4B, no asistente general).
+  - model_name: assistant-free # openrouter-nemotron-3.5-super-vl-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3.5-super-vl:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-dots-3-note-preview-free
+    litellm_params:
+      model: openrouter/dots-studio/dots-3-note-preview:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # (lfm-2.5-2.6b excluido: 2.6B < 8B)
+  - model_name: assistant-free # openrouter-nemotron-3.5-lightning-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3.5-lightning:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-inkling-small-free
+    litellm_params:
+      model: openrouter/thinkingmachines/inkling-small:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-laguna-s-2.1-free
+    litellm_params:
+      model: openrouter/poolside/laguna-s-2.1:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-inkling-free
+    litellm_params:
+      model: openrouter/thinkingmachines/inkling:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-laguna-xs-2.1-free
+    litellm_params:
+      model: openrouter/poolside/laguna-xs-2.1:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-north-mini-code-free
+    litellm_params:
+      model: openrouter/cohere/north-mini-code:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # (nemotron-3.5-content-safety excluido: guardrail 4B < 8B)
+  - model_name: assistant-free # openrouter-nemotron-3-ultra-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-nemotron-3-nano-omni-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-gemma-4-26b-free
+    litellm_params:
+      model: openrouter/google/gemma-4-26b-a4b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-gemma-4-31b-free
+    litellm_params:
+      model: openrouter/google/gemma-4-31b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-nemotron-3-super-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: assistant-free # openrouter-claude (PAGO: puede facturar)
+    litellm_params:
+      model: openrouter/anthropic/claude-sonnet-4.5
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # ---- Ollama Cloud (https://ollama.com, key en ollama.com/settings/keys) ---
+  # Ollama Cloud expone una API compatible con OpenAI, así que se usa el
+  # prefijo openai/ + api_base apuntando ollama.com.
+  # Ollama Cloud NO tiene modelos $0: el plan Free trae créditos starter
+  # para starter models y el resto es pay-as-you-go (ver /pricing).
+  # Ordenados por precio/M input ascendente (2026-10-15).
+  - model_name: assistant-free # ollama-cloud gpt-oss:120b ($0.15 in / $0.60 out por 1M)
+    litellm_params:
+      model: openai/gpt-oss:120b
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: assistant-free # ollama nemotron-3-super:cloud ($0.015 in / $0.60 out por 1M)
+    litellm_params:
+      model: openai/nemotron-3-super:cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: assistant-free # ollama nemotron-3-nano:30b-cloud ($0.06 in / $0.24 out por 1M)
+    litellm_params:
+      model: openai/nemotron-3-nano:30b-cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: assistant-free # ollama gpt-oss:20b ($0.07 in / $0.30 out por 1M)
+    litellm_params:
+      model: openai/gpt-oss:20b
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: assistant-free # ollama gemma4:cloud ($0.14 in / $0.40 out por 1M)
+    litellm_params:
+      model: openai/gemma4:cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: assistant-free # ollama glm-5.3-flash:cloud ($0.15 in / $0.50 out por 1M)
+    litellm_params:
+      model: openai/glm-5.3-flash:cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  # ---- Google AI Studio (Gemini API nativa) --------------------------------
+  # Los 2.5 están limitados a quienes ya los usaban (docs ai.google.dev);
+  # para proyectos nuevos Google recomienda 3.5-flash-lite o 3.8-flash.
+  - model_name: assistant-free # gemini-flash (2.5)
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: assistant-free # gemini-pro (2.5, PAGO fuera de free tier)
+    litellm_params:
+      model: gemini/gemini-2.5-pro
+      api_key: os.environ/GEMINI_API_KEY
+
+  # Bajo costo CON Free Tier (gratis con límites).
+  # 3.1-flash-lite $0.25 in / $1.50 out; 3.5-flash-lite $0.30 in / $2.50 out.
+  - model_name: assistant-free # gemini-3.1-flash-lite
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: assistant-free # gemini-3.5-flash-lite
+    litellm_params:
+      model: gemini/gemini-3.5-flash-lite
+      api_key: os.environ/GEMINI_API_KEY
+
+  # ---- Groq (COMENTADO: no usar) -------------------------------------------
+  # Keys: https://console.groq.com/keys
+  # Límites: https://console.groq.com/docs/rate-limits
+  # Mantén la cuenta en Free Plan para evitar consumo de pago.
+  # - model_name: groq-gpt-oss-120b
+  #   litellm_params:
+  #     model: groq/openai/gpt-oss-120b
+  #     api_key: os.environ/GROQ_API_KEY
+
+  # - model_name: groq-gpt-oss-20b
+  #   litellm_params:
+  #     model: groq/openai/gpt-oss-20b
+  #     api_key: os.environ/GROQ_API_KEY
+
+  # ---- Cloudflare Workers AI (COMENTADO: no usar) ---------------------------
+  # En Workers Free, al agotar la cuota las llamadas fallan; en Paid se cobra
+  # el exceso. https://developers.cloudflare.com/workers-ai/platform/pricing/
+  # LiteLLM obtiene el account ID de CLOUDFLARE_ACCOUNT_ID en el entorno.
+  # - model_name: cloudflare-llama-3.3-70b
+  #   litellm_params:
+  #     model: cloudflare/@cf/meta/llama-3.3-70b-instruct-fp8-fast
+  #     api_key: os.environ/CLOUDFLARE_API_KEY
+
+  # - model_name: cloudflare-qwen-coder
+  #   litellm_params:
+  #     model: cloudflare/@cf/qwen/qwen2.5-coder-32b-instruct
+  #     api_key: os.environ/CLOUDFLARE_API_KEY
+
+  # ---- AnyAPI.ai (API compatible con OpenAI) -------------------------------
+  # ANY_API_BASE debe ser https://api.anyapi.ai/v1; key en dash.anyapi.ai.
+  # IDs y precios 0 publicados en sus fichas gratuitas (2026-10-15).
+  # https://anyapi.ai/ai-models (incluidas fichas del sitemap.xml).
+  # /v1/models exige autenticación: confirmar disponibilidad y cuotas en tu
+  # cuenta. No confundir estos modelos con créditos promocionales del plan.
+  - model_name: assistant-free # anyapi-qwen-coder-free
+    litellm_params:
+      # La ficha gratuita publica este ID SIN :free; no añadir el sufijo.
+      model: openai/qwen/qwen-2.5-coder-32b-instruct
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: assistant-free # anyapi-qwen-3.8-27b-free
+    litellm_params:
+      model: openai/qwen/qwen3.8-27b:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: assistant-free # anyapi-ling-3.0-flash-fin-free
+    litellm_params:
+      model: openai/inclusionai/ling-3.0-flash-fin:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: assistant-free # anyapi-ling-3.0-flash-sante-free
+    litellm_params:
+      model: openai/inclusionai/ling-3.0-flash-sante:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: assistant-free # anyapi-gemma-4-26b-free
+    litellm_params:
+      # La ficha /ai-models/google-gemma-3n-4b-free conserva un título antiguo,
+      # pero su campo "model ID" publica Gemma 4. Confirmar en /v1/models.
+      model: openai/google/gemma-4-26b-a4b-it:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  # ---------------------------------------------------------------------
+  # Plantilla para añadir un local (Ollama/LM Studio/vLLM) sin key:
+  # - model_name: ollama-local
+  #   litellm_params:
+  #     model: ollama_chat/<modelo>
+  #     api_base: http://host.docker.internal:11434
+  # ---------------------------------------------------------------------
+
+litellm_settings:
+  # Descarta parámetros no soportados por el proveedor en vez de fallar
+  drop_params: true
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY   # admin del proxy / login a la UI
+  database_url: os.environ/DATABASE_URL       # Postgres para virtual keys + spend
+  store_model_in_db: true                     # keys, usuarios y gasto en la BD
+  # Los *modelos* se gestionan desde este fichero config.yaml
