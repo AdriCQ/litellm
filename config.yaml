@@ -234,12 +234,35 @@ model_list:
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
 
+  # ---- Local (Ollama / LM Studio en tu máquina) ---------------------------
+  # El proxy corre en Docker; host.docker.internal apunta a tu host
+  # (Docker Desktop Mac/Windows; en Linux añade extra_hosts en compose).
+  # Sin api_key: son endpoints locales sin autenticación.
+  # Requieren el servidor local en marcha (ollama serve o LM Studio con
+  # servidor local iniciado); si está caído, LiteLLM hace fallback al
+  # siguiente despliegue de assistant-free con cierta latencia extra.
+  # LFM2.5 verificado en ollama.com/library/lfm2.5 (2026-10-15):
+  # 8B-A1B edge (5.2GB, 125K ctx) y 24B-A2B (15GB, 128K ctx).
+  # Descarga previa: ollama pull lfm2.5:8b  /  ollama pull lfm2.5:24b
+  - model_name: assistant-free # ollama-local lfm2.5:8b
+    litellm_params:
+      model: ollama_chat/lfm2.5:8b
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  - model_name: assistant-free # ollama-local lfm2.5:24b
+    litellm_params:
+      model: ollama_chat/lfm2.5:24b
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
   # ---------------------------------------------------------------------
-  # Plantilla para añadir un local (Ollama/LM Studio/vLLM) sin key:
-  # - model_name: ollama-local
+  # LM Studio: servidor OpenAI-compatible (por defecto puerto 1234).
+  # Actívalo (Developer > Start server) y descomenta con el ID del modelo
+  # cargado, tal como aparece en la cabecera del servidor de LM Studio.
+  # - model_name: assistant-free # lmstudio-local <tu-modelo>
   #   litellm_params:
-  #     model: ollama_chat/<modelo>
-  #     api_base: http://host.docker.internal:11434
+  #     model: openai/<tu-modelo-cargado-en-lm-studio>
+  #     api_base: os.environ/LM_STUDIO_API_BASE
+  #     api_key: os.environ/LM_STUDIO_API_KEY
   # ---------------------------------------------------------------------
 
 litellm_settings:

@@ -16,10 +16,11 @@ Docker Compose stack: LiteLLM gateway (`litellm`) + Postgres (`db`). No app code
 
 ## Model conventions
 
-- `assistant-free` is the ONLY active `model_name`: all 30 deployments share it (LiteLLM load-balances/fallbacks across them). Keep original alias as trailing comment, e.g. `model_name: assistant-free # openrouter-inkling-free`. AVISO: mezcla rutas gratuitas, baratas y de pago (`openrouter-auto`, `openrouter-claude`, `gemini-2.5-pro`, `gpt-oss:120b`) — el tráfico puede facturar.
+- `assistant-free` is the ONLY active `model_name`: all 32 deployments share it (LiteLLM load-balances/fallbacks across them). Keep original alias as trailing comment, e.g. `model_name: assistant-free # openrouter-inkling-free`. AVISO: mezcla rutas gratuitas, baratas y de pago (`openrouter-auto`, `openrouter-claude`, `gemini-2.5-pro`, `gpt-oss:120b`) — el tráfico puede facturar.
 - Free OpenRouter: only >8B total params (totals from OpenRouter `description`, not active MoE params — so `laguna-xs` 33B, `north-mini-code` 30B, `lightning` 30B stay). Excluded: `openrouter/free` router, `lfm-2.5-2.6b` (2.6B), `nemotron-3.5-content-safety` (4B guardrail).
 - Ollama Cloud has NO $0 models — Free plan = starter credits + pay-as-you-go per `ollama.com/pricing`. Cloud tags use `:cloud` / `:30b-cloud` suffix; `gpt-oss` uses plain `:20b/:120b`. Cheapest input first: `nemotron-3-super:cloud` ($0.015/M).
 - `gemini-flash/pro` still point at 2.5, which Google limits to prior users — the `3.1/3.5-flash-lite` deployments (both with Free Tier) are the low-cost ones.
+- Local: `ollama_chat/lfm2.5:8b` (5.2GB) + `ollama_chat/lfm2.5:24b` (15GB) via `os.environ/OLLAMA_LOCAL_API_BASE`, no key. Require `ollama serve` + `ollama pull lfm2.5:8b|lfm2.5:24b` on the host; if down, requests fall back with extra latency — comment them out when unused. LM Studio via `LM_STUDIO_API_BASE`/`LM_STUDIO_API_KEY` (any key value); template stays commented until you set your loaded model ID.
 - Groq + Cloudflare blocks stay commented out (do not re-enable without asking).
 - Provider prefix quirks: `openrouter/...`, `gemini/...`, `groq/openai/...`, `cloudflare/@cf/...`, Ollama Cloud and AnyAPI use `openai/...` + `api_base`. AnyAPI Qwen Coder ID has NO `:free` suffix — do not add it.
 - Free catalog snapshot 2026-10-15; re-check `https://openrouter.ai/api/v1/models` and authenticated AnyAPI `/v1/models` before trusting availability.
