@@ -14,7 +14,7 @@
 #     cifradas en la BD.
 services:
   litellm:
-    image: docker.litellm.ai/berriai/litellm-database:1.105.0
+    image: docker.litellm.ai/berriai/litellm-database:1.105.1
     ports:
       - "4000:4000"
     environment:

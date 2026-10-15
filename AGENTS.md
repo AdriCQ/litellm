@@ -27,7 +27,7 @@ Docker Compose stack: LiteLLM gateway (`litellm`) + Postgres (`db`). No app code
 
 ## Gotchas
 
-- Image pinned at `berriai/litellm-database:1.105.0`; do not switch to `:latest`.
+- Image pinned at `berriai/litellm-database:1.105.1`; do not switch to `:latest`.
 - `LITELLM_MASTER_KEY` must start with `sk-`; generate with `openssl rand -hex 32`. Never rotate `LITELLM_SALT_KEY` once the DB holds encrypted creds.
 - `config.yaml` is mounted read-only at `/app/config.yaml`; `drop_params: true` and `store_model_in_db: true` are intentional.
 - Local-provider template at bottom of `config.yaml` uses `http://host.docker.internal:11434`.
