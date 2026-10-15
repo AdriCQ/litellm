@@ -12,7 +12,7 @@ Docker Compose stack: LiteLLM gateway (`litellm`) + Postgres (`db`). No app code
 
 - `config.yaml` change only: `docker compose exec litellm kill -USR2 1` (or `restart litellm`).
 - `.env` change: `docker compose up -d --force-recreate litellm` — plain `restart` does NOT reload env.
-- Verify: `curl http://localhost:4000/v1/models -H "Authorization: Bearer $(grep ^LITELLM_MASTER_KEY .env | cut -d= -f2)"`
+- Verify: `curl http://localhost:${LITELLM_PORT:-4000}/v1/models -H "Authorization: Bearer $(grep ^LITELLM_MASTER_KEY .env | cut -d= -f2)"`
 
 ## Model conventions
 

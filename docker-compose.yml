@@ -4,7 +4,7 @@
 # proveedores en ./.env — no en este fichero.
 #
 # Arranque:            docker compose up -d
-# Test:                curl http://localhost:4000/v1/models -H "Authorization: Bearer $(grep ^LITELLM_MASTER_KEY .env | cut -d= -f2)"
+# Test:                curl http://localhost:${LITELLM_PORT:-4000}/v1/models -H "Authorization: Bearer $(grep ^LITELLM_MASTER_KEY .env | cut -d= -f2)"
 # Cambios del config:  docker compose exec litellm kill -USR2 1   # o: docker compose restart litellm
 #
 # Notas:
@@ -16,7 +16,7 @@ services:
   litellm:
     image: docker.litellm.ai/berriai/litellm-database:1.105.1
     ports:
-      - "4000:4000"
+      - "${LITELLM_PORT:-4000}:4000"   # puerto en el host configurable vía .env
     environment:
       DATABASE_URL: postgresql://litellm:litellm@db:5432/litellm
       STORE_MODEL_IN_DB: "True"
