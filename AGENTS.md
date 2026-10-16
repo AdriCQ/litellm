@@ -22,9 +22,9 @@ Docker Compose stack: LiteLLM gateway (`litellm`) + Postgres (`db`). No app code
 - Ollama Cloud has NO $0 models — Free plan = starter credits + pay-as-you-go per `ollama.com/pricing`. Cloud tags use `:cloud` / `:30b-cloud` suffix; `gpt-oss` uses plain `:20b/:120b`. Cheapest input first: `nemotron-3-super:cloud` ($0.015/M).
 - `gemini-2.5-pro` comentado (pago fuera de free tier). Quedan `2.5-flash` + `3.1/3.5-flash-lite` (baratos, con free tier).
 - `make restart` reinicia solo el gateway (recarga `config.yaml`, NO `.env`). Más atajos en `Makefile`: `up`, `down`, `logs`.
-- Local: `ollama_chat/lfm2.5:8b` (5.2GB) + `ollama_chat/lfm2.5:24b` (15GB) via `os.environ/OLLAMA_LOCAL_API_BASE`, no key. Require `ollama serve` + `ollama pull lfm2.5:8b|lfm2.5:24b` on the host; if down, requests fall back with extra latency — comment them out when unused. LM Studio via `LM_STUDIO_API_BASE`/`LM_STUDIO_API_KEY` (any key value); template stays commented until you set your loaded model ID.
+- Local: `ollama_chat/lfm2.5:8b` (5.2GB) via `os.environ/OLLAMA_LOCAL_API_BASE`, no key. Require `ollama serve` + `ollama pull lfm2.5:8b` on the host; if down, requests fall back with extra latency — comment it out when unused. LM Studio serves `lfm2.5-24b-a2b-mlx` (15GB, build MLX) via `LM_STUDIO_API_BASE`/`LM_STUDIO_API_KEY` (any key value); requires Developer > Start server with that model loaded.
 - Groq + Cloudflare blocks stay commented out (do not re-enable without asking).
-- Provider prefix quirks: `openrouter/...`, `gemini/...`, `groq/openai/...`, `cloudflare/@cf/...`, Ollama Cloud and AnyAPI use `openai/...` + `api_base`. AnyAPI Qwen Coder ID has NO `:free` suffix — do not add it.
+- Provider prefix quirks: `openrouter/...`, `gemini/...`, `groq/openai/...`, `cloudflare/@cf/...`, Ollama Cloud and AnyAPI use `openai/...` + `api_base`. AnyAPI catalog is account-scoped: verify against the AUTHENTICATED `/v1/models` (5 `:free` + 2 paid gemini) — the website's model pages advertise IDs outside the plan; 4 stale deployed IDs removed 2026-10-15.
 - Free catalog snapshot 2026-10-15; re-check `https://openrouter.ai/api/v1/models` and authenticated AnyAPI `/v1/models` before trusting availability.
 
 ## Gotchas

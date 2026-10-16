@@ -227,43 +227,43 @@ model_list:
 
   # ---- AnyAPI.ai (API compatible con OpenAI) -------------------------------
   # ANY_API_BASE debe ser https://api.anyapi.ai/v1; key en dash.anyapi.ai.
-  # IDs y precios 0 publicados en sus fichas gratuitas (2026-10-15).
-  # https://anyapi.ai/ai-models (incluidas fichas del sitemap.xml).
-  # /v1/models exige autenticación: confirmar disponibilidad y cuotas en tu
-  # cuenta. No confundir estos modelos con créditos promocionales del plan.
-  - model_name: assistant-free # anyapi-qwen-coder-free
+  # Catálogo verificado contra /v1/models CON autenticación (2026-10-15):
+  # la cuenta solo oferta 5 modelos :free + 2 Gemini de costo (excluidos).
+  # CUIDADO: las fichas de la web no corresponden al plan real; los 4
+  # despliegues anteriores (qwen-coder, qwen3.8-27b, ling-fin, ling-sante)
+  # devolvían Access denied por no existir para esta key y se retiraron.
+  - model_name: assistant-free # anyapi-nemotron-3.5-lightning-free
     litellm_params:
-      # La ficha gratuita publica este ID SIN :free; no añadir el sufijo.
-      model: openai/qwen/qwen-2.5-coder-32b-instruct
+      model: openai/nvidia/nemotron-3.5-lightning:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
       weight: 4
 
-  - model_name: assistant-free # anyapi-qwen-3.8-27b-free
+  - model_name: assistant-free # anyapi-nemotron-3-nano-omni-free
     litellm_params:
-      model: openai/qwen/qwen3.8-27b:free
+      model: openai/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
       weight: 4
 
-  - model_name: assistant-free # anyapi-ling-3.0-flash-fin-free
+  - model_name: assistant-free # anyapi-dots-3-note-preview-free
     litellm_params:
-      model: openai/inclusionai/ling-3.0-flash-fin:free
+      model: openai/dots-studio/dots-3-note-preview:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
       weight: 4
 
-  - model_name: assistant-free # anyapi-ling-3.0-flash-sante-free
+  - model_name: assistant-free # anyapi-nemotron-3-ultra-free
     litellm_params:
-      model: openai/inclusionai/ling-3.0-flash-sante:free
+      model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
       weight: 4
 
   - model_name: assistant-free # anyapi-gemma-4-26b-free
     litellm_params:
-      # La ficha /ai-models/google-gemma-3n-4b-free conserva un título antiguo,
-      # pero su campo "model ID" publica Gemma 4. Confirmar en /v1/models.
+      # Verificado en el catálogo autenticado de la cuenta; puede dar
+      # RateLimitError cuando agota su cuota diaria :free.
       model: openai/google/gemma-4-26b-a4b-it:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
@@ -277,29 +277,25 @@ model_list:
   # servidor local iniciado); si está caído, LiteLLM hace fallback al
   # siguiente despliegue de assistant-free con cierta latencia extra.
   # LFM2.5 verificado en ollama.com/library/lfm2.5 (2026-10-15):
-  # 8B-A1B edge (5.2GB, 125K ctx) y 24B-A2B (15GB, 128K ctx).
-  # Descarga previa: ollama pull lfm2.5:8b  /  ollama pull lfm2.5:24b
+  # 8B-A1B edge (5.2GB, 125K ctx). Descarga previa: ollama pull lfm2.5:8b
+  # El 24B-A2B (15GB, 128K ctx) se sirve vía LM Studio (build MLX, abajo).
   - model_name: assistant-free # ollama-local lfm2.5:8b
     litellm_params:
       model: ollama_chat/lfm2.5:8b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
       weight: 7
 
-  - model_name: assistant-free # ollama-local lfm2.5:24b
-    litellm_params:
-      model: ollama_chat/lfm2.5:24b
-      api_base: os.environ/OLLAMA_LOCAL_API_BASE
-      weight: 7
-
   # ---------------------------------------------------------------------
   # LM Studio: servidor OpenAI-compatible (por defecto puerto 1234).
-  # Actívalo (Developer > Start server) y descomenta con el ID del modelo
-  # cargado, tal como aparece en la cabecera del servidor de LM Studio.
-  # - model_name: assistant-free # lmstudio-local <tu-modelo>
-  #   litellm_params:
-  #     model: openai/<tu-modelo-cargado-en-lm-studio>
-  #     api_base: os.environ/LM_STUDIO_API_BASE
-  #     api_key: os.environ/LM_STUDIO_API_KEY
+  # Requiere Developer > Start server y el modelo cargado:
+  # lfm2.5-24b-a2b-mlx (LFM2.5 24B-A2B, 15GB, 128K ctx — build MLX).
+  # ---------------------------------------------------------------------
+  - model_name: assistant-free # lmstudio-local lfm2.5-24b-a2b-mlx
+    litellm_params:
+      model: openai/lfm2.5-24b-a2b-mlx
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
   # ---------------------------------------------------------------------
 
 litellm_settings:
