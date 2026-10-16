@@ -269,7 +269,8 @@ model_list:
 
   # ---- Local (Ollama / LM Studio en tu máquina) ---------------------------
   # El proxy corre en Docker; host.docker.internal apunta a tu host
-  # (Docker Desktop Mac/Windows; en Linux añade extra_hosts en compose).
+  # (mapeado vía extra_hosts: host-gateway en compose; en Docker Desktop
+  # Mac/Windows resuelve nativo y el mapeo no estorba).
   # Sin api_key: son endpoints locales sin autenticación.
   # Requieren el servidor local en marcha (ollama serve o LM Studio con
   # servidor local iniciado); si está caído, el "Test connection" del
