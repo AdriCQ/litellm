@@ -8,9 +8,13 @@
 #     lectura ahí: se editan aquí y se recarga el stack.
 #   - assistant-free: TODOS los despliegues activos comparten este
 #     model_name para rotarlos (load balancing/fallback de LiteLLM).
-#     AVISO: incluye rutas de pago (openrouter-auto, claude, gemini-pro,
-#     ollama-cloud 120b) que pueden facturar. El alias original queda en
-#     comentario tras cada model_name.
+#     AVISO: incluye rutas de pago (openrouter-auto, claude, ollama-cloud)
+#     que pueden facturar. El alias original queda en comentario tras cada
+#     model_name.
+#   - Reparto por proveedor vía weight (simple-shuffle, default de LiteLLM):
+#     OpenRouter 2 c/u (15 -> 30%), Ollama 3 c/u (6 -> 18%),
+#     Gemini 6 c/u (3 -> 18%), AnyAPI 4 c/u (5 -> 20%),
+#     Local 7 c/u (2 -> 14%). Total 100.
 # ==========================================================================
 
 model_list:
@@ -20,6 +24,7 @@ model_list:
     litellm_params:
       model: openrouter/openrouter/auto
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   # Catálogo :free verificado en https://openrouter.ai/api/v1/models
   # Instantánea: 2026-10-15. Disponibilidad y cuotas pueden cambiar.
@@ -32,73 +37,87 @@ model_list:
     litellm_params:
       model: openrouter/nvidia/nemotron-3.5-super-vl:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-dots-3-note-preview-free
     litellm_params:
       model: openrouter/dots-studio/dots-3-note-preview:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   # (lfm-2.5-2.6b excluido: 2.6B < 8B)
   - model_name: assistant-free # openrouter-nemotron-3.5-lightning-free
     litellm_params:
       model: openrouter/nvidia/nemotron-3.5-lightning:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-inkling-small-free
     litellm_params:
       model: openrouter/thinkingmachines/inkling-small:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-laguna-s-2.1-free
     litellm_params:
       model: openrouter/poolside/laguna-s-2.1:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-inkling-free
     litellm_params:
       model: openrouter/thinkingmachines/inkling:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-laguna-xs-2.1-free
     litellm_params:
       model: openrouter/poolside/laguna-xs-2.1:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-north-mini-code-free
     litellm_params:
       model: openrouter/cohere/north-mini-code:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   # (nemotron-3.5-content-safety excluido: guardrail 4B < 8B)
   - model_name: assistant-free # openrouter-nemotron-3-ultra-free
     litellm_params:
       model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-nemotron-3-nano-omni-free
     litellm_params:
       model: openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-gemma-4-26b-free
     litellm_params:
       model: openrouter/google/gemma-4-26b-a4b-it:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-gemma-4-31b-free
     litellm_params:
       model: openrouter/google/gemma-4-31b-it:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-nemotron-3-super-free
     litellm_params:
       model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   - model_name: assistant-free # openrouter-claude (PAGO: puede facturar)
     litellm_params:
       model: openrouter/anthropic/claude-sonnet-4.5
       api_key: os.environ/OPENROUTER_API_KEY
+      weight: 2
 
   # ---- Ollama Cloud (https://ollama.com, key en ollama.com/settings/keys) ---
   # Ollama Cloud expone una API compatible con OpenAI, así que se usa el
@@ -111,49 +130,58 @@ model_list:
       model: openai/gpt-oss:120b
       api_base: os.environ/OLLAMA_CLOUD_API_BASE
       api_key: os.environ/OLLAMA_CLOUD_API_KEY
+      weight: 3
 
   - model_name: assistant-free # ollama nemotron-3-super:cloud ($0.015 in / $0.60 out por 1M)
     litellm_params:
       model: openai/nemotron-3-super:cloud
       api_base: os.environ/OLLAMA_CLOUD_API_BASE
       api_key: os.environ/OLLAMA_CLOUD_API_KEY
+      weight: 3
 
   - model_name: assistant-free # ollama nemotron-3-nano:30b-cloud ($0.06 in / $0.24 out por 1M)
     litellm_params:
       model: openai/nemotron-3-nano:30b-cloud
       api_base: os.environ/OLLAMA_CLOUD_API_BASE
       api_key: os.environ/OLLAMA_CLOUD_API_KEY
+      weight: 3
 
   - model_name: assistant-free # ollama gpt-oss:20b ($0.07 in / $0.30 out por 1M)
     litellm_params:
       model: openai/gpt-oss:20b
       api_base: os.environ/OLLAMA_CLOUD_API_BASE
       api_key: os.environ/OLLAMA_CLOUD_API_KEY
+      weight: 3
 
   - model_name: assistant-free # ollama gemma4:cloud ($0.14 in / $0.40 out por 1M)
     litellm_params:
       model: openai/gemma4:cloud
       api_base: os.environ/OLLAMA_CLOUD_API_BASE
       api_key: os.environ/OLLAMA_CLOUD_API_KEY
+      weight: 3
 
   - model_name: assistant-free # ollama glm-5.3-flash:cloud ($0.15 in / $0.50 out por 1M)
     litellm_params:
       model: openai/glm-5.3-flash:cloud
       api_base: os.environ/OLLAMA_CLOUD_API_BASE
       api_key: os.environ/OLLAMA_CLOUD_API_KEY
+      weight: 3
 
   # ---- Google AI Studio (Gemini API nativa) --------------------------------
   # Los 2.5 están limitados a quienes ya los usaban (docs ai.google.dev);
   # para proyectos nuevos Google recomienda 3.5-flash-lite o 3.8-flash.
+  # gemini-2.5-pro COMENTADO: de pago fuera del free tier.
   - model_name: assistant-free # gemini-flash (2.5)
     litellm_params:
       model: gemini/gemini-2.5-flash
       api_key: os.environ/GEMINI_API_KEY
+      weight: 6
 
-  - model_name: assistant-free # gemini-pro (2.5, PAGO fuera de free tier)
-    litellm_params:
-      model: gemini/gemini-2.5-pro
-      api_key: os.environ/GEMINI_API_KEY
+  # - model_name: assistant-free # gemini-pro (2.5, PAGO fuera de free tier)
+  #   litellm_params:
+  #     model: gemini/gemini-2.5-pro
+  #     api_key: os.environ/GEMINI_API_KEY
+  #     weight: 6
 
   # Bajo costo CON Free Tier (gratis con límites).
   # 3.1-flash-lite $0.25 in / $1.50 out; 3.5-flash-lite $0.30 in / $2.50 out.
@@ -161,11 +189,13 @@ model_list:
     litellm_params:
       model: gemini/gemini-3.1-flash-lite
       api_key: os.environ/GEMINI_API_KEY
+      weight: 6
 
   - model_name: assistant-free # gemini-3.5-flash-lite
     litellm_params:
       model: gemini/gemini-3.5-flash-lite
       api_key: os.environ/GEMINI_API_KEY
+      weight: 6
 
   # ---- Groq (COMENTADO: no usar) -------------------------------------------
   # Keys: https://console.groq.com/keys
@@ -207,24 +237,28 @@ model_list:
       model: openai/qwen/qwen-2.5-coder-32b-instruct
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
+      weight: 4
 
   - model_name: assistant-free # anyapi-qwen-3.8-27b-free
     litellm_params:
       model: openai/qwen/qwen3.8-27b:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
+      weight: 4
 
   - model_name: assistant-free # anyapi-ling-3.0-flash-fin-free
     litellm_params:
       model: openai/inclusionai/ling-3.0-flash-fin:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
+      weight: 4
 
   - model_name: assistant-free # anyapi-ling-3.0-flash-sante-free
     litellm_params:
       model: openai/inclusionai/ling-3.0-flash-sante:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
+      weight: 4
 
   - model_name: assistant-free # anyapi-gemma-4-26b-free
     litellm_params:
@@ -233,6 +267,7 @@ model_list:
       model: openai/google/gemma-4-26b-a4b-it:free
       api_base: os.environ/ANY_API_BASE
       api_key: os.environ/ANY_API_KEY
+      weight: 4
 
   # ---- Local (Ollama / LM Studio en tu máquina) ---------------------------
   # El proxy corre en Docker; host.docker.internal apunta a tu host
@@ -248,11 +283,13 @@ model_list:
     litellm_params:
       model: ollama_chat/lfm2.5:8b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
+      weight: 7
 
   - model_name: assistant-free # ollama-local lfm2.5:24b
     litellm_params:
       model: ollama_chat/lfm2.5:24b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
+      weight: 7
 
   # ---------------------------------------------------------------------
   # LM Studio: servidor OpenAI-compatible (por defecto puerto 1234).
