@@ -6,7 +6,7 @@ Docker Compose stack: LiteLLM gateway (`litellm`) + Postgres (`db`). No app code
 
 - `config.yaml` — models/providers. Admin UI shows them read-only; edit here.
 - `.env` (gitignored) — all secrets. Never put keys in `config.yaml`; use `os.environ/VAR`.
-- `docker-compose.yml` — wiring. `DATABASE_URL` comes from compose env, not `.env`.
+- `docker-compose.yml` — wiring. `DATABASE_URL` se construye desde `POSTGRES_*` (.env), no se define directa.
 
 ## Reload rules (easy to get wrong)
 
