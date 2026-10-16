@@ -37,7 +37,7 @@ services:
         condition: service_healthy
 
   db:
-    image: postgres:16
+    image: postgres:17
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-litellm}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-litellm}
