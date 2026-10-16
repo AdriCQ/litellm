@@ -5,27 +5,25 @@
 #     variables de entorno (.env en el host, montadas por docker-compose)
 #     usando la sintaxis os.environ/NOMBRE_VAR.
 #   - Los modelos de este fichero aparecen en la Admin UI pero son de solo
-#     lectura ahí: se editan aquí y se recarga el stack.
+#     lectura ahí: NO se pueden pausar/borrar desde el dashboard
+#     ("Config models cannot be paused from the dashboard. Pause is DB-backed").
+#     Para desactivar uno, coméntalo aquí y recarga el stack.
 #   - assistant-free: TODOS los despliegues activos comparten este
 #     model_name para rotarlos (load balancing/fallback de LiteLLM).
-#     AVISO: incluye rutas de pago (openrouter-auto, claude, ollama-cloud)
-#     que pueden facturar. El alias original queda en comentario tras cada
-#     model_name.
+#     AVISO: incluye rutas de pago (openrouter-claude, ollama-cloud,
+#     gemini fuera de free tier) que pueden facturar. El alias original
+#     queda en comentario tras cada model_name.
 #   - Reparto por proveedor vía weight (simple-shuffle, default de LiteLLM):
-#     OpenRouter 2 c/u (15 -> 30%), Ollama 3 c/u (6 -> 18%),
+#     OpenRouter 2 c/u (14 -> 28%), Ollama 3 c/u (6 -> 18%),
 #     Gemini 6 c/u (3 -> 18%), AnyAPI 4 c/u (5 -> 20%),
-#     Local 7 c/u (2 -> 14%). Total 100.
+#     Local 7 c/u (2 -> 14%). Total 98.
+#   - openrouter/auto ELIMINADO a propósito: router de pago, no debe estar.
+#     No re-añadir sin pedirlo.
 # ==========================================================================
 
 model_list:
 
-  # ---- OpenRouter (acceso a todos los proveedores, incluidos modelos free) --
-  - model_name: assistant-free # openrouter-auto (PAGO: puede facturar)
-    litellm_params:
-      model: openrouter/openrouter/auto
-      api_key: os.environ/OPENROUTER_API_KEY
-      weight: 2
-
+  # ---- OpenRouter (solo modelos :free; auto excluido a propósito) ---------
   # Catálogo :free verificado en https://openrouter.ai/api/v1/models
   # Instantánea: 2026-10-15. Disponibilidad y cuotas pueden cambiar.
   # Todos comparten OPENROUTER_API_KEY; no hay fallback a modelos de pago.
@@ -274,14 +272,19 @@ model_list:
   # (Docker Desktop Mac/Windows; en Linux añade extra_hosts en compose).
   # Sin api_key: son endpoints locales sin autenticación.
   # Requieren el servidor local en marcha (ollama serve o LM Studio con
-  # servidor local iniciado); si está caído, LiteLLM hace fallback al
-  # siguiente despliegue de assistant-free con cierta latencia extra.
+  # servidor local iniciado); si está caído, el "Test connection" del
+  # dashboard da APIConnectionError (Cannot connect to host...) y LiteLLM
+  # hace fallback al siguiente despliegue de assistant-free con latencia
+  # extra. Eso NO es un bug del config: arranca el servidor local o
+  # comenta estos dos bloques cuando no los uses.
+  # Proveedor LiteLLM: ollama/ (endpoint /api/generate). NO usar el
+  # prefijo ollama_chat/ para este despliegue.
   # LFM2.5 verificado en ollama.com/library/lfm2.5 (2026-10-15):
   # 8B-A1B edge (5.2GB, 125K ctx). Descarga previa: ollama pull lfm2.5:8b
   # El 24B-A2B (15GB, 128K ctx) se sirve vía LM Studio (build MLX, abajo).
   - model_name: assistant-free # ollama-local lfm2.5:8b
     litellm_params:
-      model: ollama_chat/lfm2.5:8b
+      model: ollama/lfm2.5:8b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
       weight: 7
 
