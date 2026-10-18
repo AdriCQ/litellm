@@ -20,11 +20,11 @@
 #     despliegue por nombre). LM Studio usa separación por ":" estilo
 #     ollama (lmstudio:<id-tal-cual-lo-sirve-LM-Studio>).
 #   - Reparto por proveedor vía weight (simple-shuffle, default de LiteLLM):
-#     OpenRouter 2 c/u (14 -> 28/147 ~19%), Ollama Cloud 3 c/u (6 -> 18/147
-#     ~12%), Gemini 6 c/u (3 -> 18/147 ~12%), AnyAPI 4 c/u (5 -> 20/147
-#     ~14%), Local 7 c/u (9 -> 63/147 ~43%). Total 147.
-#     Local = 2 Ollama + 7 LM Studio chat (los 2 embeddings de LM Studio
-#     solo tienen alias directo, fuera del pool: no sirven chat).
+#     OpenRouter 2 c/u (14 -> 28/112 =25%), Ollama Cloud 3 c/u (6 -> 18/112
+#     ~16%), Gemini 6 c/u (3 -> 18/112 ~16%), AnyAPI 4 c/u (5 -> 20/112
+#     ~18%), Local 7 c/u (4 -> 28/112 =25%). Total 112.
+#     Local = 2 Ollama + 2 LM Studio chat (más alias directo del embedding
+#     Qwen; el resto de LM Studio no se expone en LiteLLM a propósito).
 #   - openrouter/auto ELIMINADO a propósito: router de pago, no debe estar.
 #     No re-añadir sin pedirlo.
 # ==========================================================================
@@ -309,16 +309,10 @@ model_list:
   # ---------------------------------------------------------------------
   # LM Studio: servidor OpenAI-compatible (por defecto puerto 1234).
   # Requiere Developer > Start server con los modelos cargados.
-  # Refleja EXACTAMENTE /v1/models (2026-10-18): 7 chat en el pool
-  # (los 2 embeddings solo tienen alias directo, no sirven chat).
+  # Solo lfm2.5-24b-a2b y qwen3.5-4b (2026-10-18): el resto de modelos
+  # de LM Studio NO se expone en LiteLLM a propósito (el embedding Qwen
+  # solo tiene alias directo abajo: no sirve chat, fuera del pool).
   # ---------------------------------------------------------------------
-  - model_name: assistant-free # lmstudio:lfm2.5-24b-a2b-mlx
-    litellm_params:
-      model: openai/lfm2.5-24b-a2b-mlx
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-      weight: 7
-
   - model_name: assistant-free # lmstudio:lfm2.5-24b-a2b
     litellm_params:
       model: openai/lfm2.5-24b-a2b
@@ -333,34 +327,6 @@ model_list:
       api_key: os.environ/LM_STUDIO_API_KEY
       weight: 7
 
-  - model_name: assistant-free # lmstudio:ornith-1.5-35b-a3b-splash
-    litellm_params:
-      model: openai/ornith-1.5-35b-a3b-splash
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-      weight: 7
-
-  - model_name: assistant-free # lmstudio:d1-3b
-    litellm_params:
-      model: openai/d1-3b
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-      weight: 7
-
-  - model_name: assistant-free # lmstudio:ternary-bonsai-2-27b-mlx
-    litellm_params:
-      model: openai/ternary-bonsai-2-27b-mlx
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-      weight: 7
-
-  # ID servido con prefijo "openai/"; el alias lo omite para no duplicar.
-  - model_name: assistant-free # lmstudio:gpt-oss-20b
-    litellm_params:
-      model: openai/openai/gpt-oss-20b
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-      weight: 7
   # ---------------------------------------------------------------------
 
   # ---- Aliases individuales (llamada directa, sin balanceo) -------------
@@ -535,14 +501,9 @@ model_list:
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
 
   # LM Studio (nomenclatura con ":" estilo ollama: lmstudio:<id>).
-  # Chat: gemelo de cada despliegue del pool. Embeddings: SOLO alias
-  # directo (no sirven chat; meterlos al pool rompería el fallback).
-  - model_name: lmstudio:lfm2.5-24b-a2b-mlx
-    litellm_params:
-      model: openai/lfm2.5-24b-a2b-mlx
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-
+  # Los 2 del pool (gemelo de cada despliegue) + alias directo del
+  # embedding Qwen (no sirve chat; meterlo al pool rompería el fallback).
+  # ---------------------------------------------------------------------
   - model_name: lmstudio:lfm2.5-24b-a2b
     litellm_params:
       model: openai/lfm2.5-24b-a2b
@@ -555,39 +516,9 @@ model_list:
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
 
-  - model_name: lmstudio:ornith-1.5-35b-a3b-splash
-    litellm_params:
-      model: openai/ornith-1.5-35b-a3b-splash
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-
-  - model_name: lmstudio:d1-3b
-    litellm_params:
-      model: openai/d1-3b
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-
-  - model_name: lmstudio:ternary-bonsai-2-27b-mlx
-    litellm_params:
-      model: openai/ternary-bonsai-2-27b-mlx
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-
-  - model_name: lmstudio:gpt-oss-20b
-    litellm_params:
-      model: openai/openai/gpt-oss-20b
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-
   - model_name: lmstudio:text-embedding-qwen3-embedding-0.6b
     litellm_params:
       model: openai/text-embedding-qwen3-embedding-0.6b
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
-
-  - model_name: lmstudio:text-embedding-nomic-embed-text-v1.5
-    litellm_params:
-      model: openai/text-embedding-nomic-embed-text-v1.5
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
   # ---------------------------------------------------------------------
