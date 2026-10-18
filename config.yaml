@@ -329,6 +329,80 @@ model_list:
 
   # ---------------------------------------------------------------------
 
+  # ---- Grupos de enrutamiento (varios despliegues, un model_name) -------
+  # qwen3.5-4b: balanceo/fallback entre Ollama local y LM Studio local.
+  # Los 5 grupos *-free: mismo modelo :free en OpenRouter y AnyAPI.
+  # Sin weight: reparto equitativo. Los alias directos
+  # (ollama-local-qwen3.5-4b, lmstudio:qwen3.5-4b, openrouter-*, anyapi-*)
+  # siguen existiendo abajo.
+  # ---------------------------------------------------------------------
+  - model_name: qwen3.5-4b # ollama local
+    litellm_params:
+      model: ollama/qwen3.5:4b
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  - model_name: qwen3.5-4b # LM Studio local
+    litellm_params:
+      model: openai/qwen3.5-4b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: nemotron-3.5-lightning-free # OpenRouter
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3.5-lightning:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: nemotron-3.5-lightning-free # AnyAPI
+    litellm_params:
+      model: openai/nvidia/nemotron-3.5-lightning:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: nemotron-3-nano-omni-free # OpenRouter
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: nemotron-3-nano-omni-free # AnyAPI
+    litellm_params:
+      model: openai/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: dots-3-note-preview-free # OpenRouter
+    litellm_params:
+      model: openrouter/dots-studio/dots-3-note-preview:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: dots-3-note-preview-free # AnyAPI
+    litellm_params:
+      model: openai/dots-studio/dots-3-note-preview:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: nemotron-3-ultra-free # OpenRouter
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: nemotron-3-ultra-free # AnyAPI
+    litellm_params:
+      model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: gemma-4-26b-free # OpenRouter
+    litellm_params:
+      model: openrouter/google/gemma-4-26b-a4b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: gemma-4-26b-free # AnyAPI
+    litellm_params:
+      model: openai/google/gemma-4-26b-a4b-it:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+  # ---------------------------------------------------------------------
+
   # ---- Aliases individuales (llamada directa, sin balanceo) -------------
   # Cada bloque duplica el despliegue correspondiente de assistant-free
   # con su model_name original. Sin weight: un solo despliegue por nombre.
