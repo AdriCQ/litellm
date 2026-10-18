@@ -13,10 +13,18 @@
 #     AVISO: incluye rutas de pago (openrouter-claude, ollama-cloud,
 #     gemini fuera de free tier) que pueden facturar. El alias original
 #     queda en comentario tras cada model_name.
+#   - Alias individuales: cada despliegue existe ADEMÁS con su model_name
+#     original (p. ej. openrouter-inkling-free, ollama-local-qwen3.5-4b,
+#     lmstudio:qwen3.5-4b), para llamada directa sin balanceo. Ver sección
+#     "Aliases individuales" al final del model_list. Sin weight (un solo
+#     despliegue por nombre). LM Studio usa separación por ":" estilo
+#     ollama (lmstudio:<id-tal-cual-lo-sirve-LM-Studio>).
 #   - Reparto por proveedor vía weight (simple-shuffle, default de LiteLLM):
-#     OpenRouter 2 c/u (14 -> 28%), Ollama 3 c/u (6 -> 18%),
-#     Gemini 6 c/u (3 -> 18%), AnyAPI 4 c/u (5 -> 20%),
-#     Local 7 c/u (2 -> 14%). Total 98.
+#     OpenRouter 2 c/u (14 -> 28/147 ~19%), Ollama Cloud 3 c/u (6 -> 18/147
+#     ~12%), Gemini 6 c/u (3 -> 18/147 ~12%), AnyAPI 4 c/u (5 -> 20/147
+#     ~14%), Local 7 c/u (9 -> 63/147 ~43%). Total 147.
+#     Local = 2 Ollama + 7 LM Studio chat (los 2 embeddings de LM Studio
+#     solo tienen alias directo, fuera del pool: no sirven chat).
 #   - openrouter/auto ELIMINADO a propósito: router de pago, no debe estar.
 #     No re-añadir sin pedirlo.
 # ==========================================================================
@@ -289,17 +297,299 @@ model_list:
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
       weight: 7
 
+  # Qwen3.5 4B local (3.3-4.0GB, 256K ctx, Text+Image).
+  # Verificado en ollama.com/library/qwen3.5 (2026-10-18).
+  # Descarga previa en el host: ollama pull qwen3.5:4b
+  - model_name: assistant-free # ollama-local-qwen3.5-4b
+    litellm_params:
+      model: ollama/qwen3.5:4b
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+      weight: 7
+
   # ---------------------------------------------------------------------
   # LM Studio: servidor OpenAI-compatible (por defecto puerto 1234).
-  # Requiere Developer > Start server y el modelo cargado:
-  # lfm2.5-24b-a2b-mlx (LFM2.5 24B-A2B, 15GB, 128K ctx — build MLX).
+  # Requiere Developer > Start server con los modelos cargados.
+  # Refleja EXACTAMENTE /v1/models (2026-10-18): 7 chat en el pool
+  # (los 2 embeddings solo tienen alias directo, no sirven chat).
   # ---------------------------------------------------------------------
-  - model_name: assistant-free # lmstudio-local lfm2.5-24b-a2b-mlx
+  - model_name: assistant-free # lmstudio:lfm2.5-24b-a2b-mlx
     litellm_params:
       model: openai/lfm2.5-24b-a2b-mlx
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
       weight: 7
+
+  - model_name: assistant-free # lmstudio:lfm2.5-24b-a2b
+    litellm_params:
+      model: openai/lfm2.5-24b-a2b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
+
+  - model_name: assistant-free # lmstudio:qwen3.5-4b
+    litellm_params:
+      model: openai/qwen3.5-4b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
+
+  - model_name: assistant-free # lmstudio:ornith-1.5-35b-a3b-splash
+    litellm_params:
+      model: openai/ornith-1.5-35b-a3b-splash
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
+
+  - model_name: assistant-free # lmstudio:d1-3b
+    litellm_params:
+      model: openai/d1-3b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
+
+  - model_name: assistant-free # lmstudio:ternary-bonsai-2-27b-mlx
+    litellm_params:
+      model: openai/ternary-bonsai-2-27b-mlx
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
+
+  # ID servido con prefijo "openai/"; el alias lo omite para no duplicar.
+  - model_name: assistant-free # lmstudio:gpt-oss-20b
+    litellm_params:
+      model: openai/openai/gpt-oss-20b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
+  # ---------------------------------------------------------------------
+
+  # ---- Aliases individuales (llamada directa, sin balanceo) -------------
+  # Cada bloque duplica el despliegue correspondiente de assistant-free
+  # con su model_name original. Sin weight: un solo despliegue por nombre.
+  # Mantén ambas secciones sincronizadas al añadir/quitar modelos.
+
+  # OpenRouter
+  - model_name: openrouter-nemotron-3.5-super-vl-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3.5-super-vl:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-dots-3-note-preview-free
+    litellm_params:
+      model: openrouter/dots-studio/dots-3-note-preview:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-nemotron-3.5-lightning-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3.5-lightning:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-inkling-small-free
+    litellm_params:
+      model: openrouter/thinkingmachines/inkling-small:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-laguna-s-2.1-free
+    litellm_params:
+      model: openrouter/poolside/laguna-s-2.1:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-inkling-free
+    litellm_params:
+      model: openrouter/thinkingmachines/inkling:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-laguna-xs-2.1-free
+    litellm_params:
+      model: openrouter/poolside/laguna-xs-2.1:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-north-mini-code-free
+    litellm_params:
+      model: openrouter/cohere/north-mini-code:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-nemotron-3-ultra-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-nemotron-3-nano-omni-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-gemma-4-26b-free
+    litellm_params:
+      model: openrouter/google/gemma-4-26b-a4b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-gemma-4-31b-free
+    litellm_params:
+      model: openrouter/google/gemma-4-31b-it:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-nemotron-3-super-free
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter-claude
+    litellm_params:
+      model: openrouter/anthropic/claude-sonnet-4.5
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # Ollama Cloud
+  - model_name: ollama-cloud-gpt-oss-120b
+    litellm_params:
+      model: openai/gpt-oss:120b
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: ollama-cloud-nemotron-3-super
+    litellm_params:
+      model: openai/nemotron-3-super:cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: ollama-cloud-nemotron-3-nano-30b
+    litellm_params:
+      model: openai/nemotron-3-nano:30b-cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: ollama-cloud-gpt-oss-20b
+    litellm_params:
+      model: openai/gpt-oss:20b
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: ollama-cloud-gemma4
+    litellm_params:
+      model: openai/gemma4:cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  - model_name: ollama-cloud-glm-5.3-flash
+    litellm_params:
+      model: openai/glm-5.3-flash:cloud
+      api_base: os.environ/OLLAMA_CLOUD_API_BASE
+      api_key: os.environ/OLLAMA_CLOUD_API_KEY
+
+  # Gemini
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: gemini-3.1-flash-lite
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: gemini-3.5-flash-lite
+    litellm_params:
+      model: gemini/gemini-3.5-flash-lite
+      api_key: os.environ/GEMINI_API_KEY
+
+  # AnyAPI.ai
+  - model_name: anyapi-nemotron-3.5-lightning-free
+    litellm_params:
+      model: openai/nvidia/nemotron-3.5-lightning:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: anyapi-nemotron-3-nano-omni-free
+    litellm_params:
+      model: openai/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: anyapi-dots-3-note-preview-free
+    litellm_params:
+      model: openai/dots-studio/dots-3-note-preview:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: anyapi-nemotron-3-ultra-free
+    litellm_params:
+      model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  - model_name: anyapi-gemma-4-26b-free
+    litellm_params:
+      model: openai/google/gemma-4-26b-a4b-it:free
+      api_base: os.environ/ANY_API_BASE
+      api_key: os.environ/ANY_API_KEY
+
+  # Local
+  - model_name: ollama-local-lfm2.5-8b
+    litellm_params:
+      model: ollama/lfm2.5:8b
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  - model_name: ollama-local-qwen3.5-4b
+    litellm_params:
+      model: ollama/qwen3.5:4b
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  # LM Studio (nomenclatura con ":" estilo ollama: lmstudio:<id>).
+  # Chat: gemelo de cada despliegue del pool. Embeddings: SOLO alias
+  # directo (no sirven chat; meterlos al pool rompería el fallback).
+  - model_name: lmstudio:lfm2.5-24b-a2b-mlx
+    litellm_params:
+      model: openai/lfm2.5-24b-a2b-mlx
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:lfm2.5-24b-a2b
+    litellm_params:
+      model: openai/lfm2.5-24b-a2b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:qwen3.5-4b
+    litellm_params:
+      model: openai/qwen3.5-4b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:ornith-1.5-35b-a3b-splash
+    litellm_params:
+      model: openai/ornith-1.5-35b-a3b-splash
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:d1-3b
+    litellm_params:
+      model: openai/d1-3b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:ternary-bonsai-2-27b-mlx
+    litellm_params:
+      model: openai/ternary-bonsai-2-27b-mlx
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:gpt-oss-20b
+    litellm_params:
+      model: openai/openai/gpt-oss-20b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:text-embedding-qwen3-embedding-0.6b
+    litellm_params:
+      model: openai/text-embedding-qwen3-embedding-0.6b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:text-embedding-nomic-embed-text-v1.5
+    litellm_params:
+      model: openai/text-embedding-nomic-embed-text-v1.5
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
   # ---------------------------------------------------------------------
 
 litellm_settings:
