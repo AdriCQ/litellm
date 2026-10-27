@@ -320,9 +320,9 @@ model_list:
       api_key: os.environ/LM_STUDIO_API_KEY
       weight: 7
 
-  - model_name: assistant-free # lmstudio:qwen3.5-4b
+  - model_name: assistant-free # lmstudio:ling-3.0-tiny
     litellm_params:
-      model: openai/qwen3.5-4b
+      model: openai/ling-3.0-tiny
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
       weight: 7
@@ -340,12 +340,6 @@ model_list:
     litellm_params:
       model: ollama/qwen3.5:4b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
-
-  - model_name: qwen3.5-4b # LM Studio local
-    litellm_params:
-      model: openai/qwen3.5-4b
-      api_base: os.environ/LM_STUDIO_API_BASE
-      api_key: os.environ/LM_STUDIO_API_KEY
 
   - model_name: nemotron-3.5-lightning-free # OpenRouter
     litellm_params:
@@ -584,9 +578,9 @@ model_list:
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
 
-  - model_name: lmstudio:qwen3.5-4b
+  - model_name: lmstudio:ling-3.0-tiny
     litellm_params:
-      model: openai/qwen3.5-4b
+      model: openai/ling-3.0-tiny
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
 
