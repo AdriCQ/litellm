@@ -20,10 +20,10 @@
 #     despliegue por nombre). LM Studio usa separación por ":" estilo
 #     ollama (lmstudio:<id-tal-cual-lo-sirve-LM-Studio>).
 #   - Reparto por proveedor vía weight (simple-shuffle, default de LiteLLM):
-#     OpenRouter 2 c/u (14 -> 28/112 =25%), Ollama Cloud 3 c/u (6 -> 18/112
-#     ~16%), Gemini 6 c/u (3 -> 18/112 ~16%), AnyAPI 4 c/u (5 -> 20/112
-#     ~18%), Local 7 c/u (4 -> 28/112 =25%). Total 112.
-#     Local = 2 Ollama + 2 LM Studio chat (más alias directo del embedding
+#     OpenRouter 2 c/u (14 -> 28/119 ~24%), Ollama Cloud 3 c/u (6 -> 18/119
+#     ~15%), Gemini 6 c/u (3 -> 18/119 ~15%), AnyAPI 4 c/u (5 -> 20/119
+#     ~17%), Local 7 c/u (5 -> 35/119 ~29%). Total 119.
+#     Local = 2 Ollama + 3 LM Studio chat (más alias directo del embedding
 #     Qwen; el resto de LM Studio no se expone en LiteLLM a propósito).
 #   - openrouter/auto ELIMINADO a propósito: router de pago, no debe estar.
 #     No re-añadir sin pedirlo.
@@ -309,9 +309,10 @@ model_list:
   # ---------------------------------------------------------------------
   # LM Studio: servidor OpenAI-compatible (por defecto puerto 1234).
   # Requiere Developer > Start server con los modelos cargados.
-  # Solo lfm2.5-24b-a2b y qwen3.5-4b (2026-10-18): el resto de modelos
-  # de LM Studio NO se expone en LiteLLM a propósito (el embedding Qwen
-  # solo tiene alias directo abajo: no sirve chat, fuera del pool).
+  # Solo lfm2.5-24b-a2b, ling-3.0-tiny y lfm3-1.7b (2026-10-28): el resto
+  # de modelos de LM Studio NO se expone en LiteLLM a propósito (el
+  # embedding Qwen solo tiene alias directo abajo: no sirve chat, fuera
+  # del pool).
   # ---------------------------------------------------------------------
   - model_name: assistant-free # lmstudio:lfm2.5-24b-a2b
     litellm_params:
@@ -323,6 +324,13 @@ model_list:
   - model_name: assistant-free # lmstudio:ling-3.0-tiny
     litellm_params:
       model: openai/ling-3.0-tiny
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+      weight: 7
+
+  - model_name: assistant-free # lmstudio:lfm3-1.7b
+    litellm_params:
+      model: openai/lfm3-1.7b
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
       weight: 7
@@ -569,7 +577,7 @@ model_list:
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
 
   # LM Studio (nomenclatura con ":" estilo ollama: lmstudio:<id>).
-  # Los 2 del pool (gemelo de cada despliegue) + alias directo del
+  # Los 3 del pool (gemelo de cada despliegue) + alias directo del
   # embedding Qwen (no sirve chat; meterlo al pool rompería el fallback).
   # ---------------------------------------------------------------------
   - model_name: lmstudio:lfm2.5-24b-a2b
@@ -581,6 +589,12 @@ model_list:
   - model_name: lmstudio:ling-3.0-tiny
     litellm_params:
       model: openai/ling-3.0-tiny
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
+
+  - model_name: lmstudio:lfm3-1.7b
+    litellm_params:
+      model: openai/lfm3-1.7b
       api_base: os.environ/LM_STUDIO_API_BASE
       api_key: os.environ/LM_STUDIO_API_KEY
 
