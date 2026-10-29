@@ -289,10 +289,10 @@ model_list:
   # comenta estos dos bloques cuando no los uses.
   # Proveedor LiteLLM: ollama/ (endpoint /api/generate). NO usar el
   # prefijo ollama_chat/ para este despliegue.
-  # LFM3 1.7B local (ollama). Descarga previa: ollama pull lfm3:1.7b
+  # LFM3 1.7B local (ollama). Descarga previa: ollama pull lfm3-1.7b
   - model_name: assistant-free # ollama-local-lfm3-1.7b
     litellm_params:
-      model: ollama/lfm3:1.7b
+      model: ollama/lfm3-1.7b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
       weight: 7
 
@@ -329,7 +329,7 @@ model_list:
   # ---------------------------------------------------------------------
   - model_name: lfm3-1.7b # ollama local
     litellm_params:
-      model: ollama/lfm3:1.7b
+      model: ollama/lfm3-1.7b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
 
   - model_name: lfm3-1.7b # Ollama remoto (ollamacu)
@@ -562,7 +562,7 @@ model_list:
   # Local
   - model_name: ollama-local-lfm3-1.7b
     litellm_params:
-      model: ollama/lfm3:1.7b
+      model: ollama/lfm3-1.7b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
 
   # Ollama remoto (ollamacu.adric.me)
