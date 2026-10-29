@@ -20,10 +20,10 @@
 #     despliegue por nombre). LM Studio usa separación por ":" estilo
 #     ollama (lmstudio:<id-tal-cual-lo-sirve-LM-Studio>).
 #   - Reparto por proveedor vía weight (simple-shuffle, default de LiteLLM):
-#     OpenRouter 2 c/u (14 -> 28/119 ~24%), Ollama Cloud 3 c/u (6 -> 18/119
-#     ~15%), Gemini 6 c/u (3 -> 18/119 ~15%), AnyAPI 4 c/u (5 -> 20/119
-#     ~17%), Local 7 c/u (5 -> 35/119 ~29%). Total 119.
-#     Local = 2 Ollama + 3 LM Studio chat (más alias directo del embedding
+#     OpenRouter 2 c/u (14 -> 28/126 ~22%), Ollama Cloud 3 c/u (6 -> 18/126
+#     ~14%), Gemini 6 c/u (3 -> 18/126 ~14%), AnyAPI 4 c/u (5 -> 20/126
+#     ~16%), Local 7 c/u (6 -> 42/126 ~33%). Total 126.
+#     Local = 3 Ollama + 3 LM Studio chat (más alias directo del embedding
 #     Qwen; el resto de LM Studio no se expone en LiteLLM a propósito).
 #   - openrouter/auto ELIMINADO a propósito: router de pago, no debe estar.
 #     No re-añadir sin pedirlo.
@@ -306,6 +306,13 @@ model_list:
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
       weight: 7
 
+  # LFM3 1.7B Q8_0 local (ollama). Descarga previa: ollama pull lfm3:1.7b-q8_0
+  - model_name: assistant-free # ollama-local-lfm3-1.7b-q8_0
+    litellm_params:
+      model: ollama/lfm3:1.7b-q8_0
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+      weight: 7
+
   # ---------------------------------------------------------------------
   # LM Studio: servidor OpenAI-compatible (por defecto puerto 1234).
   # Requiere Developer > Start server con los modelos cargados.
@@ -348,6 +355,17 @@ model_list:
     litellm_params:
       model: ollama/qwen3.5:4b
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  - model_name: lfm3-1.7b # ollama local
+    litellm_params:
+      model: ollama/lfm3:1.7b-q8_0
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  - model_name: lfm3-1.7b # LM Studio
+    litellm_params:
+      model: openai/lfm3-1.7b
+      api_base: os.environ/LM_STUDIO_API_BASE
+      api_key: os.environ/LM_STUDIO_API_KEY
 
   - model_name: nemotron-3.5-lightning-free # OpenRouter
     litellm_params:
@@ -574,6 +592,11 @@ model_list:
   - model_name: ollama-local-qwen3.5-4b
     litellm_params:
       model: ollama/qwen3.5:4b
+      api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  - model_name: ollama-local-lfm3-1.7b-q8_0
+    litellm_params:
+      model: ollama/lfm3:1.7b-q8_0
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
 
   # LM Studio (nomenclatura con ":" estilo ollama: lmstudio:<id>).
