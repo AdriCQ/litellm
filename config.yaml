@@ -20,11 +20,12 @@
 #     despliegue por nombre). LM Studio usa separación por ":" estilo
 #     ollama (lmstudio:<id-tal-cual-lo-sirve-LM-Studio>).
 #   - Reparto por proveedor vía weight (simple-shuffle, default de LiteLLM):
-#     OpenRouter 2 c/u (14 -> 28/126 ~22%), Ollama Cloud 3 c/u (6 -> 18/126
-#     ~14%), Gemini 6 c/u (3 -> 18/126 ~14%), AnyAPI 4 c/u (5 -> 20/126
-#     ~16%), Local 7 c/u (6 -> 42/126 ~33%). Total 126.
-#     Local = 3 Ollama + 3 LM Studio chat (más alias directo del embedding
-#     Qwen; el resto de LM Studio no se expone en LiteLLM a propósito).
+#     OpenRouter 2 c/u (14 -> 28/119 ~24%), Ollama Cloud 3 c/u (6 -> 18/119
+#     ~15%), Gemini 6 c/u (3 -> 18/119 ~15%), AnyAPI 4 c/u (5 -> 20/119
+#     ~17%), Local 7 c/u (4 -> 28/119 ~24%), Ollamacu 7 (1 -> 7/119 ~6%).
+#     Total 119.
+#     Local = 1 Ollama (lfm3) + 3 LM Studio chat (más alias directo del
+#     embedding Qwen; el resto de LM Studio no se expone en LiteLLM a propósito).
 #   - openrouter/auto ELIMINADO a propósito: router de pago, no debe estar.
 #     No re-añadir sin pedirlo.
 # ==========================================================================
@@ -288,29 +289,18 @@ model_list:
   # comenta estos dos bloques cuando no los uses.
   # Proveedor LiteLLM: ollama/ (endpoint /api/generate). NO usar el
   # prefijo ollama_chat/ para este despliegue.
-  # LFM2.5 verificado en ollama.com/library/lfm2.5 (2026-10-15):
-  # 8B-A1B edge (5.2GB, 125K ctx). Descarga previa: ollama pull lfm2.5:8b
-  # El 24B-A2B (15GB, 128K ctx) se sirve vía LM Studio (build MLX, abajo).
-  - model_name: assistant-free # ollama-local lfm2.5:8b
-    litellm_params:
-      model: ollama/lfm2.5:8b
-      api_base: os.environ/OLLAMA_LOCAL_API_BASE
-      weight: 7
-
-  # Qwen3.5 4B local (3.3-4.0GB, 256K ctx, Text+Image).
-  # Verificado en ollama.com/library/qwen3.5 (2026-10-18).
-  # Descarga previa en el host: ollama pull qwen3.5:4b
-  - model_name: assistant-free # ollama-local-qwen3.5-4b
-    litellm_params:
-      model: ollama/qwen3.5:4b
-      api_base: os.environ/OLLAMA_LOCAL_API_BASE
-      weight: 7
-
   # LFM3 1.7B Q8_0 local (ollama). Descarga previa: ollama pull lfm3:1.7b-q8_0
   - model_name: assistant-free # ollama-local-lfm3-1.7b-q8_0
     litellm_params:
       model: ollama/lfm3:1.7b-q8_0
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
+      weight: 7
+
+  # Ollama remoto (ollamacu.adric.me) — lfm3-1.7b.
+  - model_name: assistant-free # ollamacu-lfm3-1.7b
+    litellm_params:
+      model: ollama/lfm3-1.7b:latest
+      api_base: os.environ/OLLAMACU_API_BASE
       weight: 7
 
   # ---------------------------------------------------------------------
@@ -345,21 +335,22 @@ model_list:
   # ---------------------------------------------------------------------
 
   # ---- Grupos de enrutamiento (varios despliegues, un model_name) -------
-  # qwen3.5-4b: balanceo/fallback entre Ollama local y LM Studio local.
+  # lfm3-1.7b: balanceo/fallback entre Ollama local, Ollama remoto
+  # (ollamacu) y LM Studio local.
   # Los 5 grupos *-free: mismo modelo :free en OpenRouter y AnyAPI.
   # Sin weight: reparto equitativo. Los alias directos
-  # (ollama-local-qwen3.5-4b, lmstudio:qwen3.5-4b, openrouter-*, anyapi-*)
-  # siguen existiendo abajo.
+  # (ollama-local-lfm3-1.7b-q8_0, ollamacu-lfm3-1.7b, lmstudio:lfm3-1.7b,
+  # openrouter-*, anyapi-*) siguen existiendo abajo.
   # ---------------------------------------------------------------------
-  - model_name: qwen3.5-4b # ollama local
-    litellm_params:
-      model: ollama/qwen3.5:4b
-      api_base: os.environ/OLLAMA_LOCAL_API_BASE
-
   - model_name: lfm3-1.7b # ollama local
     litellm_params:
       model: ollama/lfm3:1.7b-q8_0
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  - model_name: lfm3-1.7b # Ollama remoto (ollamacu)
+    litellm_params:
+      model: ollama/lfm3-1.7b:latest
+      api_base: os.environ/OLLAMACU_API_BASE
 
   - model_name: lfm3-1.7b # LM Studio
     litellm_params:
@@ -584,20 +575,16 @@ model_list:
       api_key: os.environ/ANY_API_KEY
 
   # Local
-  - model_name: ollama-local-lfm2.5-8b
-    litellm_params:
-      model: ollama/lfm2.5:8b
-      api_base: os.environ/OLLAMA_LOCAL_API_BASE
-
-  - model_name: ollama-local-qwen3.5-4b
-    litellm_params:
-      model: ollama/qwen3.5:4b
-      api_base: os.environ/OLLAMA_LOCAL_API_BASE
-
   - model_name: ollama-local-lfm3-1.7b-q8_0
     litellm_params:
       model: ollama/lfm3:1.7b-q8_0
       api_base: os.environ/OLLAMA_LOCAL_API_BASE
+
+  # Ollama remoto (ollamacu.adric.me)
+  - model_name: ollamacu-lfm3-1.7b
+    litellm_params:
+      model: ollama/lfm3-1.7b:latest
+      api_base: os.environ/OLLAMACU_API_BASE
 
   # LM Studio (nomenclatura con ":" estilo ollama: lmstudio:<id>).
   # Los 3 del pool (gemelo de cada despliegue) + alias directo del
